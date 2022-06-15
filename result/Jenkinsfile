@@ -14,7 +14,7 @@ pipeline {
 
       when{
 
-        changeset "**/worker/**"
+        changeset "**/result/**"
 
       }
 
@@ -22,7 +22,7 @@ pipeline {
 
         container('jnlp'){
 
-          sh 'cd worker; mvn compile;'
+          sh 'cd result; mvn compile;'
 
         }
 
@@ -40,7 +40,7 @@ pipeline {
 
       when{
 
-        changeset "**/worker/**"
+        changeset "**/result/**"
 
       }
 
@@ -48,7 +48,7 @@ pipeline {
 
         container('jnlp'){
 
-          sh 'cd worker; mvn clean test;'
+          sh 'cd result; mvn clean test;'
 
         }
 
@@ -61,7 +61,7 @@ pipeline {
 
       when{
 
-        changeset "**/worker/**"
+        changeset "**/result/**"
 
       }
 
@@ -71,7 +71,7 @@ pipeline {
 
           sh 'ls -lah'
 
-          sh 'cd worker; ls -lah; /kaniko/executor --context `pwd` --verbosity debug --destination harbor5.btech.id/library/worker:main'
+          sh 'cd result; ls -lah; /kaniko/executor --context `pwd` --verbosity debug --destination harbor5.btech.id/library/result:main'
 
         }
 
