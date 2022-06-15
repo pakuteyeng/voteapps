@@ -1,0 +1,96 @@
+pipeline {
+
+  agent { label 'docker' } 
+
+  stages{
+
+    stage("build"){
+
+      tools{
+
+        maven 'maven 3.6.1'  
+
+      }
+
+      when{
+
+        changeset "**/worker/**"
+
+      }
+
+      steps{
+
+        container('jnlp'){
+
+          sh 'cd worker; mvn compile;'
+
+        }
+
+      }
+
+    }
+
+    stage("test"){
+
+      tools{
+
+        maven 'maven 3.6.1'  
+
+      }
+
+      when{
+
+        changeset "**/worker/**"
+
+      }
+
+      steps{
+
+        container('jnlp'){
+
+          sh 'cd worker; mvn clean test;'
+
+        }
+
+      }
+
+    }
+  
+  }
+  stage("build-and-push=image"){
+
+      when{
+
+        changeset "**/worker/**"
+
+      }
+
+      steps{
+
+        container('kaniko'){
+
+          sh 'ls -lah'
+
+          sh 'cd worker; ls -lah; /kaniko/executor --context `pwd` --verbosity debug --destination harbor5.btech.id/library/worker:main'
+
+        }
+
+      }
+
+    }
+
+
+
+
+
+  }
+
+  post{
+
+    always{
+
+      echo 'Pipeline Complete'}
+
+  }
+
+}
