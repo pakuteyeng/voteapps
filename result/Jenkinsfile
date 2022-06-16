@@ -1,91 +1,66 @@
 pipeline {
-
   agent { label 'docker' } 
 
   stages{
-
     stage("build"){
-
       tools{
-
         maven 'maven 3.6.1'  
-
       }
-
       when{
-
         changeset "**/result/**"
-
       }
-
       steps{
-
         container('jnlp'){
-
           sh 'cd result; mvn compile;'
-
         }
-
       }
-
     }
 
     stage("test"){
-
       tools{
-
         maven 'maven 3.6.1'  
-
       }
-
       when{
-
         changeset "**/result/**"
-
       }
-
       steps{
-
         container('jnlp'){
-
           sh 'cd result; mvn clean test;'
-
         }
-
       }
-
     }
-  
-  }
-  stage("build-and-push=image"){
 
+    stage("packaging"){
+      tools{
+        maven 'maven 3.6.1'  
+      }
       when{
-
         changeset "**/result/**"
-
       }
-
       steps{
-
-        container('kaniko'){
-
-          sh 'ls -lah'
-
-          sh 'cd result; ls -lah; /kaniko/executor --context `pwd` --verbosity debug --destination harbor5.btech.id/library/result:main'
-
+        container('jnlp'){
+          sh 'cd result; mvn package -DskipTests'
+          archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
         }
-
       }
-
     }
-  }
 
+    stage("build-and-push=image"){
+      when{
+        changeset "**/result/**"
+      }
+      steps{
+        container('kaniko'){
+          sh 'ls -lah'
+          sh 'cd result; ls -lah; /kaniko/executor --context `pwd` --verbosity debug --destination harbor5.btech.id/library/result:main'
+        }
+      }
+    }
+
+
+  }
   post{
-
     always{
-
       echo 'Pipeline Complete'}
-
   }
-
 }
